@@ -1,4 +1,5 @@
 <?php
+
 require('../model/conexion.php');
 require('constante.php');
 
@@ -9,13 +10,27 @@ if (session_status() === PHP_SESSION_NONE) {
 $usuario = isset($_POST['Usuario']) ? $_POST['Usuario'] : '';
 $password = isset($_POST['Contraseña']) ? $_POST['Contraseña'] : '';
 
-
-
 $con = new conexion();
+
+if (isset($_POST['tipo_seleccionado'])) {
+    // Ya seleccionó el tipo de usuario
+    $_SESSION['tipo'] = $_POST['tipo_seleccionado'];
+    $_SESSION['id_usu'] = $_POST['id_usuario'];
+    $_SESSION['nombre'] = $_POST['nombres'];
+    $_SESSION['foto'] = $_POST['foto'];
+    // Redirigir según tipo
+    if ($_SESSION['tipo'] == 'ADMINISTRADOR') {
+        header('Location: ../views/WellcomeAdmin.php');
+    } else {
+        header('Location: ../views/WellcomeEmpleado.php');
+    }
+    exit;
+}
+
+// Primer acceso: validar usuario y mostrar selección de perfiles
 $searchUser = $con->getUser($usuario, $password);
 
 if (empty($searchUser)) {
-    // Usuario no encontrado
     echo '
         <script language="javascript">
             alert("Usuario o Contraseña incorrectos, por favor intente de nuevo");
@@ -23,34 +38,9 @@ if (empty($searchUser)) {
         </script>
     ';
     exit;
-} else {
-    // Usuario encontrado, inicializar variables y guardar en sesión
-    $user = $searchUser[0];
-    $tipo = $user['tipo'];
-    $id_usuario = $user['id_usu'];
-    $nombres = $user['nombre'];
-    $foto = $user['foto'];
-
-    // Guardar datos en sesión
-    $_SESSION['id_usuario'] = $id_usuario;
-    $_SESSION['nombres'] = $nombres;
-    $_SESSION['tipo'] = $tipo;
-    $_SESSION['foto'] = $foto;
-
-    // Redirigir según el tipo de usuario
-    if ($tipo == 'VENTAS') {
-        require('../views/WellcomeVentas.php');
-    } else if ($tipo == 'ADMINISTRADOR') {
-        $urlViews = URL_VIEWS;
-        require('../views/Wellcome.php');
-    } else {
-        // Tipo de usuario desconocido
-        echo '
-            <script language="javascript">
-                alert("Tipo de usuario no reconocido.");
-                self.location = "../index.php";
-            </script>
-        ';
-        exit;
-    }
 }
+
+// Guardar datos en sesión para la selección
+$_SESSION['perfiles'] = $searchUser;
+header('Location: ../views/SelectProfile.php');
+exit;

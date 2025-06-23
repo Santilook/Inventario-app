@@ -1,4 +1,3 @@
-
 <?php
 
 class conexion {
@@ -19,26 +18,36 @@ class conexion {
             die("Conexión fallida: " . $this->con->connect_error);
         }
     }
+    
+    public function getConnection() {
+    return $this->con;
+    }
 
     public function getUser($usuario, $password) {
-        $retorno = [];
-
-        $stmt = $this->con->prepare("SELECT * FROM usuarios WHERE login = ? AND password = ?");
-        if ($stmt) {
-            $stmt->bind_param("ss", $usuario, $password);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            while ($fila = $result->fetch_assoc()) {
-                $retorno[] = $fila;
-            }
-
-            $stmt->close();
-        } else {
-            // Manejo de error en la preparación de la consulta
-            error_log("Error en la preparación de la consulta: " . $this->con->error);
+        $sql = "SELECT u.id_usu, u.login, u.password, u.foto, c.nombre, c.tipo
+            FROM usuarios u
+            JOIN clientes c ON u.id_usu = c.id_usu
+            WHERE u.login = ? AND u.password = ?";
+        $stmt = $this->con->prepare($sql);
+        $stmt->bind_param("ss", $usuario, $password);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $users = [];
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
         }
+        return $users;
+    }
 
-        return $retorno;
+    public function getAllUsers() {
+        $sql = "SELECT id_usu, login, password, foto, nombre, tipo FROM usuarios";
+        $result = $this->con->query($sql);
+        $usuarios = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $usuarios[] = $row;
+            }
+        }
+        return $usuarios;
     }
 }
