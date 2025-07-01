@@ -8,7 +8,7 @@ Este es un sistema de inventario simple y funcional pensado especialmente para p
 
 ## 🚀 Demo en vivo
 
-👉 [Ver Demo Frontend/Login (Netlify) (https://683649c904cd505ffab5927a--gentle-jalebi-3787cd.netlify.app/)
+👉 [Ver Demo Frontend/Login (Netlify) (https://resilient-scone-67071c.netlify.app/)
 
 
 
